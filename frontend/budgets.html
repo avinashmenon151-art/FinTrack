@@ -1,1 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Budgets – FinTrack</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
 
+  <!-- Sticky Top Header -->
+  <header class="dashboard-header">
+    <div class="header-container">
+      <div class="header-brand">
+        <div class="header-logo">₹</div>
+        <h1>FinTrack</h1>
+      </div>
+
+      <div class="header-actions">
+        <div class="user-pill">
+          <div id="userAvatar" class="user-avatar">U</div>
+          <span id="userName">User</span>
+        </div>
+        <button id="logoutBtn" class="btn btn-secondary" title="Sign out of FinTrack">
+          Sign Out
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Menu Bar -->
+  <nav class="dashboard-nav">
+    <div class="nav-container">
+      <a href="dashboard.html" class="nav-link">Dashboard</a>
+      <a href="accounts.html" class="nav-link">Accounts</a>
+      <a href="transactions.html" class="nav-link">Transactions</a>
+      <a href="categories.html" class="nav-link">Categories</a>
+      <a href="budgets.html" class="nav-link active">Budgets</a>
+      <a href="savings-goals.html" class="nav-link">Savings Goals</a>
+    </div>
+  </nav>
+
+  <!-- Main Content Body -->
+  <main class="dashboard-main">
+    <!-- Feedback Toast Notification -->
+    <div id="pageToast" class="alert alert-success" style="display: none;" role="status"></div>
+
+    <!-- Page Header & Action Controls -->
+    <div class="page-header">
+      <div class="page-title">
+        <h2>Budgets Management</h2>
+        <p>Set and manage spending limits for financial categories across custom time periods</p>
+      </div>
+      <button id="addBudgetBtn" class="btn btn-primary">
+        + Create Budget
+      </button>
+    </div>
+
+    <!-- Summary Overview Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-title">Active Budgets</span>
+          <span class="table-badge badge-income">Period</span>
+        </div>
+        <div id="activeBudgetsCount" class="stat-value">0</div>
+        <div class="stat-meta">Currently running budget plans</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-title">Total Allocated</span>
+          <span class="table-badge badge-system">Allocation</span>
+        </div>
+        <div id="totalBudgetsAllocated" class="stat-value stat-income">₹0.00</div>
+        <div class="stat-meta">Sum of all category limits</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-title">Tracked Categories</span>
+          <span class="table-badge badge-custom">Categories</span>
+        </div>
+        <div id="totalTrackedCategories" class="stat-value">0</div>
+        <div class="stat-meta">Allocations across all budgets</div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loadingIndicator" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>Loading budgets...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="content-section" style="display: none;">
+      <div class="placeholder-box">
+        <div class="placeholder-icon">📊</div>
+        <h4>No budgets found</h4>
+        <p class="text-secondary" style="margin-bottom: 1.25rem;">
+          You haven't set up any budgets yet. Create a budget to plan your category spending limits and monitor your finances.
+        </p>
+        <button id="emptyCreateBtn" class="btn btn-primary">
+          + Create Budget
+        </button>
+      </div>
+    </div>
+
+    <!-- Budgets Responsive Grid -->
+    <div id="budgetsGrid" class="budgets-grid" style="display: none;">
+      <!-- Populated dynamically by budgets.js -->
+    </div>
+  </main>
+
+  <!-- Add / Edit Budget Modal -->
+  <div id="budgetModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalTitle">Create Budget</h3>
+        <button type="button" id="closeBudgetModalBtn" class="modal-close-btn" aria-label="Close modal">&times;</button>
+      </div>
+
+      <form id="budgetForm" novalidate>
+        <div class="modal-body">
+          <!-- Inline Modal Error Alert -->
+          <div id="modalError" class="alert alert-error" style="display: none;" role="alert"></div>
+
+          <!-- Budget Name -->
+          <div class="form-group">
+            <label for="budgetName">Budget Name <span class="text-muted">*</span></label>
+            <input 
+              type="text" 
+              id="budgetName" 
+              class="form-control" 
+              placeholder="e.g. October 2026 Household Budget" 
+              maxlength="100" 
+              required
+            >
+          </div>
+
+          <!-- Start Date -->
+          <div class="form-group">
+            <label for="startDate">Start Date <span class="text-muted">*</span></label>
+            <input 
+              type="date" 
+              id="startDate" 
+              class="form-control" 
+              required
+            >
+          </div>
+
+          <!-- End Date -->
+          <div class="form-group">
+            <label for="endDate">End Date <span class="text-muted">*</span></label>
+            <input 
+              type="date" 
+              id="endDate" 
+              class="form-control" 
+              required
+            >
+            <div class="form-text">End date must be greater than or equal to start date.</div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="cancelBudgetBtn" class="btn btn-secondary">Cancel</button>
+          <button type="submit" id="saveBudgetBtn" class="btn btn-primary">Save Budget</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Budget Category Management Modal -->
+  <div id="categoryManagerModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card" style="max-width: 580px;">
+      <div class="modal-header">
+        <div>
+          <h3 id="managerModalTitle">Manage Budget Categories</h3>
+          <p id="managerModalDates" class="text-muted" style="font-size: 0.825rem; margin-top: 0.2rem;"></p>
+        </div>
+        <button type="button" id="closeManagerModalBtn" class="modal-close-btn" aria-label="Close modal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Inline Manager Error Alert -->
+        <div id="managerModalError" class="alert alert-error" style="display: none;" role="alert"></div>
+
+        <!-- Allocation Header Summary -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-color);">
+          <span style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary);">Allocated Categories</span>
+          <span id="managerTotalAllocated" style="font-weight: 700; color: var(--accent-green); font-size: 1.05rem;">₹0.00</span>
+        </div>
+
+        <!-- Categories List -->
+        <div id="managerCategoriesList" class="cat-manager-list">
+          <!-- Populated dynamically by budgets.js -->
+        </div>
+
+        <!-- Add Category to Budget Sub-Panel -->
+        <div class="cat-manager-add-panel">
+          <h4 style="font-size: 0.95rem; margin-bottom: 0.75rem; color: var(--text-primary);">+ Allocate Category to Budget</h4>
+          <form id="addCategoryForm" novalidate>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+              <div>
+                <label for="addCategorySelect" style="font-size: 0.775rem; color: var(--text-secondary); display: block; margin-bottom: 0.25rem;">Category</label>
+                <select id="addCategorySelect" class="form-control" style="font-size: 0.85rem; padding: 0.5rem;" required>
+                  <option value="">Select Category</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="addCategoryAmount" style="font-size: 0.775rem; color: var(--text-secondary); display: block; margin-bottom: 0.25rem;">Allocated Amount (₹)</label>
+                <input 
+                  type="number" 
+                  id="addCategoryAmount" 
+                  class="form-control" 
+                  step="0.01" 
+                  min="0.01" 
+                  placeholder="0.00" 
+                  style="font-size: 0.85rem; padding: 0.5rem;" 
+                  required
+                >
+              </div>
+            </div>
+
+            <div id="addCategoryNotice" class="text-muted" style="display: none; font-size: 0.8rem; margin-bottom: 0.5rem;">
+              All available categories are already assigned to this budget.
+            </div>
+
+            <button type="submit" id="submitAddCategoryBtn" class="btn btn-primary btn-sm">
+              + Add Category Allocation
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" id="closeManagerDoneBtn" class="btn btn-primary">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Budget Confirmation Modal -->
+  <div id="deleteBudgetModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Confirm Budget Deletion</h3>
+        <button type="button" id="closeDeleteBudgetModalBtn" class="modal-close-btn" aria-label="Close modal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <p id="deleteBudgetConfirmMessage" style="margin-bottom: 0.75rem;">
+          Are you sure you want to delete this budget? All category allocations for this budget will also be permanently removed.
+        </p>
+        <div id="deleteBudgetDetails" class="placeholder-box" style="padding: 1rem; text-align: left; font-size: 0.85rem; margin-bottom: 0.5rem;">
+          <!-- Dynamically populated budget details -->
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" id="cancelDeleteBudgetBtn" class="btn btn-secondary">Cancel</button>
+        <button type="button" id="confirmDeleteBudgetBtn" class="btn btn-danger">Delete Budget</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Remove Category from Budget Confirmation Modal -->
+  <div id="removeCategoryModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Remove Category Allocation</h3>
+        <button type="button" id="closeRemoveCategoryModalBtn" class="modal-close-btn" aria-label="Close modal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <p id="removeCategoryConfirmMessage" style="margin-bottom: 0.5rem;">
+          Are you sure you want to remove this category from the budget?
+        </p>
+        <div id="removeCategoryDetails" class="placeholder-box" style="padding: 0.85rem; text-align: left; font-size: 0.85rem; margin-bottom: 0.5rem;">
+          <!-- Dynamically populated category name & allocation -->
+        </div>
+        <p class="text-muted" style="font-size: 0.8rem;">
+          Note: This operation only removes the allocation from this budget. The category and your recorded transactions will remain safe.
+        </p>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" id="cancelRemoveCategoryBtn" class="btn btn-secondary">Cancel</button>
+        <button type="button" id="confirmRemoveCategoryBtn" class="btn btn-danger">Remove Allocation</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/budgets.js"></script>
+</body>
+</html>

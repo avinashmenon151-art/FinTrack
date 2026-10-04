@@ -309,19 +309,28 @@ public class JsonUtil {
         if (obj instanceof Budget) {
             Budget b = (Budget) obj;
             return "{" +
+                    "\"budget_id\":" + toJson(b.getBudgetId()) + "," +
                     "\"budgetId\":" + toJson(b.getBudgetId()) + "," +
+                    "\"user_id\":" + toJson(b.getUserId()) + "," +
                     "\"userId\":" + toJson(b.getUserId()) + "," +
+                    "\"budget_name\":" + toJson(b.getBudgetName()) + "," +
                     "\"budgetName\":" + toJson(b.getBudgetName()) + "," +
+                    "\"start_date\":" + toJson(b.getStartDate()) + "," +
                     "\"startDate\":" + toJson(b.getStartDate()) + "," +
+                    "\"end_date\":" + toJson(b.getEndDate()) + "," +
                     "\"endDate\":" + toJson(b.getEndDate()) + "," +
+                    "\"created_at\":" + toJson(b.getCreatedAt()) + "," +
                     "\"createdAt\":" + toJson(b.getCreatedAt()) +
                     "}";
         }
         if (obj instanceof BudgetCategory) {
             BudgetCategory bc = (BudgetCategory) obj;
             return "{" +
+                    "\"budget_id\":" + toJson(bc.getBudgetId()) + "," +
                     "\"budgetId\":" + toJson(bc.getBudgetId()) + "," +
+                    "\"category_id\":" + toJson(bc.getCategoryId()) + "," +
                     "\"categoryId\":" + toJson(bc.getCategoryId()) + "," +
+                    "\"allocated_amount\":" + toJson(bc.getAllocatedAmount()) + "," +
                     "\"allocatedAmount\":" + toJson(bc.getAllocatedAmount()) +
                     "}";
         }
