@@ -3,7 +3,7 @@ package controller;
 import dao.UserDAO;
 import model.User;
 import util.AuthUtil;
-import util.BCrypt;
+import org.mindrot.jbcrypt.BCrypt;
 import util.JsonUtil;
 
 import javax.servlet.ServletException;
@@ -148,7 +148,7 @@ public class AuthServlet extends HttpServlet {
         try {
             User user = userDAO.findByEmail(normalizedEmail);
 
-            // Verify credentials: check both existence and BCrypt hash match
+            // Verify credentials
             if (user == null || !BCrypt.checkpw(password, user.getPasswordHash())) {
                 JsonUtil.sendErrorResponse(resp, HttpServletResponse.SC_UNAUTHORIZED,
                         "Invalid email or password");
