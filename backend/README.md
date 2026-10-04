@@ -61,13 +61,41 @@ backend/
 
 ---
 
-## 3. Architecture & Security Flow
+## 3. Database Connection Configuration
+
+FinTrack manages JDBC connections through `util.DBConnection`. Credentials and connection parameters can be configured dynamically without recompiling:
+
+### Environment Variables
+```bash
+# Optional: Set custom connection parameters
+export DB_URL="jdbc:postgresql://localhost:5432/fintrack"
+export DB_USER="postgres"
+export DB_PASSWORD="YourSecurePasswordHere"
+```
+
+### Java System Properties (Tomcat `setenv.bat` or `setenv.sh`)
+Alternatively, configure system properties on startup:
+```bash
+-Dfintrack.db.url=jdbc:postgresql://localhost:5432/fintrack
+-Dfintrack.db.user=postgres
+-Dfintrack.db.password=YourSecurePasswordHere
+```
+
+### Defaults (Development)
+If neither environment variables nor system properties are specified, `DBConnection` defaults to:
+- **URL**: `jdbc:postgresql://localhost:5432/fintrack`
+- **User**: `postgres`
+- **Password**: `""` (empty string)
+
+---
+
+## 4. Architecture & Security Flow
 
 ```text
 HTTP Request (JSON + Cookie)
        │
        ▼
-CorsFilter (Origin reflection, Access-Control-Allow-Credentials: true, preflight OPTIONS)
+CorsFilter (Origin whitelist reflection, Access-Control-Allow-Credentials: true, preflight OPTIONS)
        │
        ▼
 AuthenticationFilter (Validates active session for protected endpoints, returns 401 without hitting DAOs)
@@ -79,7 +107,7 @@ Controller / Servlet (Extracts AUTHENTICATED_USER_ID from session, validates own
 DAO (Parameterized PreparedStatement, strict relational constraints)
        │
        ▼
-DBConnection (Thread-safe JDBC connection pooling / retrieval)
+DBConnection (Thread-safe JDBC connection retrieval)
        │
        ▼
 PostgreSQL Database ('fintrack')
@@ -87,22 +115,22 @@ PostgreSQL Database ('fintrack')
 
 ---
 
-## 4. Authentication & Session Management
+## 5. Authentication & Session Management
 
 FinTrack uses **standard Java Servlet HTTP Sessions (`HttpSession`)** and **BCrypt** password hashing. Neither JWT nor heavyweight security frameworks (Spring Security, OAuth) are introduced.
 
-### 4.1 Password Hashing (BCrypt)
+### 5.1 Password Hashing (BCrypt)
 - **Algorithm**: Standard OpenBSD Blowfish BCrypt (`$2a$` prefix, cost factor `12`).
 - **Registration**: Plaintext password &rarr; `BCrypt.hashpw(password, BCrypt.gensalt(12))` &rarr; `users.password_hash`.
 - **Login**: Plaintext password &rarr; `BCrypt.checkpw(password, user.getPasswordHash())` &rarr; Authenticated Session.
 - **Safety**: Passwords are never stored in plaintext and never logged.
 - **Sanitization**: `password_hash` is **never** serialized or returned in any JSON response. `JsonUtil` guarantees this across all endpoints.
 
-### 4.2 Dependency Configuration
+### 5.2 Dependency Configuration
 - FinTrack includes a self-contained, binary-compatible BCrypt implementation in `backend/src/util/BCrypt.java`.
 - Alternatively, standard `jbcrypt-0.4.jar` (Maven coordinate: `org.mindrot:jbcrypt:0.4`) can be dropped directly into `backend/WEB-INF/lib/`.
 
-### 4.3 Session Identity (`AUTHENTICATED_USER_ID`)
+### 5.3 Session Identity (`AUTHENTICATED_USER_ID`)
 - Only the integer user ID is stored in the session under the attribute key:
   ```java
   public static final String SESSION_USER_ID = "AUTHENTICATED_USER_ID";
@@ -114,7 +142,7 @@ FinTrack uses **standard Java Servlet HTTP Sessions (`HttpSession`)** and **BCry
   - Tracking mode explicitly set to `COOKIE`.
   - In production HTTPS environments, `<secure>true</secure>` should be enabled.
 
-### 4.4 Removal of Client `user_id` Trust
+### 5.4 Removal of Client `user_id` Trust
 Protected endpoints **do not trust** any client-supplied `user_id` query parameter or body property.
 - Ownership is derived exclusively via `AuthUtil.getAuthenticatedUserId(request)`.
 - Creating an account, transaction, custom category, budget, or savings goal automatically binds `userId = authenticatedUserId`.
@@ -122,9 +150,9 @@ Protected endpoints **do not trust** any client-supplied `user_id` query paramet
 
 ---
 
-## 5. API Endpoints Reference
+## 6. API Endpoints Reference
 
-### 5.1 Authentication Endpoints (`/api/auth/*` - Public & Session Lifecycle)
+### 6.1 Authentication Endpoints (`/api/auth/*` - Public & Session Lifecycle)
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
 | `POST` | `/api/auth/register` | Public | Register new user with BCrypt hash (body: `name`, `email`, `password`, optional `phone_number`). Returns `201 Created` with safe user profile. |
@@ -132,14 +160,14 @@ Protected endpoints **do not trust** any client-supplied `user_id` query paramet
 | `POST` | `/api/auth/logout` | Authenticated / Public | Invalidates the active HTTP session. Returns `200 OK` message. |
 | `GET` | `/api/auth/me` | Protected | Returns the currently authenticated user's profile. Returns `401 Unauthorized` if session is missing. |
 
-### 5.2 User Management (`/api/users/*` - Protected)
+### 6.2 User Management (`/api/users/*` - Protected)
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
 | `GET` | `/api/users/me` or `/api/users/{id}` | Retrieve profile for authenticated user only (`{id}` must match authenticated session). |
 | `PUT` | `/api/users/me` or `/api/users/{id}` | Update profile for authenticated user only. Plaintext passwords submitted are BCrypt-hashed before persistence. |
 | `DELETE`| `/api/users/me` or `/api/users/{id}` | Delete authenticated user account and invalidate session. |
 
-### 5.3 Financial Accounts (`/api/accounts/*` - Protected)
+### 6.3 Financial Accounts (`/api/accounts/*` - Protected)
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
 | `GET` | `/api/accounts` | List all accounts owned by the authenticated user. |
@@ -149,7 +177,7 @@ Protected endpoints **do not trust** any client-supplied `user_id` query paramet
 | `PUT` | `/api/accounts/{id}/default` | Designate account as default for authenticated user (strictly verifies account ownership). |
 | `DELETE`| `/api/accounts/{id}` | Delete financial account (enforces authenticated user ownership). |
 
-### 5.4 Categories (`/api/categories/*` - Protected)
+### 6.4 Categories (`/api/categories/*` - Protected)
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
 | `GET` | `/api/categories` | Retrieve available categories (system categories + authenticated user's custom categories). |
@@ -159,7 +187,7 @@ Protected endpoints **do not trust** any client-supplied `user_id` query paramet
 | `PUT` | `/api/categories/{id}` | Update custom category (system categories cannot be edited; another user's category cannot be accessed). |
 | `DELETE`| `/api/categories/{id}` | Delete custom category (system categories cannot be deleted; another user's category cannot be accessed). |
 
-### 5.5 Transactions (`/api/transactions/*` - Protected)
+### 6.5 Transactions (`/api/transactions/*` - Protected)
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
 | `GET` | `/api/transactions` | List authenticated user's transaction history. |
@@ -170,7 +198,7 @@ Protected endpoints **do not trust** any client-supplied `user_id` query paramet
 | `PUT` | `/api/transactions/{id}` | Update transaction (enforces authenticated user ownership). |
 | `DELETE`| `/api/transactions/{id}` | Delete transaction (enforces authenticated user ownership). |
 
-### 5.6 Budgets (`/api/budgets/*` - Protected)
+### 6.6 Budgets (`/api/budgets/*` - Protected)
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
 | `GET` | `/api/budgets` | List all budgets for authenticated user. |
@@ -179,7 +207,7 @@ Protected endpoints **do not trust** any client-supplied `user_id` query paramet
 | `PUT` | `/api/budgets/{id}` | Update budget (enforces authenticated user ownership). |
 | `DELETE`| `/api/budgets/{id}` | Delete budget (enforces authenticated user ownership). |
 
-### 5.7 Budget Category Allocations (`/api/budgets/{budgetId}/categories` or `/api/budget-categories/*` - Protected)
+### 6.7 Budget Category Allocations (`/api/budget-categories/*` - Protected)
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
 | `GET` | `/api/budget-categories/{budgetId}` | List category allocations (strictly verifies budget belongs to authenticated user). |
@@ -187,7 +215,7 @@ Protected endpoints **do not trust** any client-supplied `user_id` query paramet
 | `PUT` | `/api/budget-categories/{budgetId}/{catId}`| Update allocated amount (strictly verifies budget belongs to authenticated user). |
 | `DELETE`| `/api/budget-categories/{budgetId}/{catId}`| Remove category from budget (strictly verifies budget belongs to authenticated user). |
 
-### 5.8 Savings Goals (`/api/savings-goals/*` - Protected)
+### 6.8 Savings Goals (`/api/savings-goals/*` - Protected)
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
 | `GET` | `/api/savings-goals` | List savings goals for authenticated user. |
@@ -198,17 +226,26 @@ Protected endpoints **do not trust** any client-supplied `user_id` query paramet
 
 ---
 
-## 6. CORS & Credential Configuration
+## 7. CORS & Credential Configuration
 
 Cross-Origin Resource Sharing is managed by [backend/src/filter/CorsFilter.java](file:///c:/Users/User1/FinTrack/FinTrack/backend/src/filter/CorsFilter.java):
-- **Development Frontend Origin**: Defaults to `http://localhost:5500` (e.g., Live Server / Vite development server) and dynamically mirrors the request's `Origin` header.
+- **Development Frontend Origin**: Supports `http://localhost:5500`, `http://127.0.0.1:5500`, `http://localhost:3000`, `http://127.0.0.1:3000`, and mirrors valid request origin.
 - **Credentials Enabled**: `Access-Control-Allow-Credentials: true` is sent on all API responses so browsers include cookies (`JSESSIONID`) across cross-origin requests.
 - **Wildcard Avoidance**: The wildcard `*` is strictly avoided in `Access-Control-Allow-Origin` because modern browsers reject credentialed requests with wildcard origins.
 - **Preflight Support**: Handles HTTP `OPTIONS` requests by returning `200 OK` with allowable headers (`Content-Type`, `Authorization`, `X-Requested-With`, `Accept`, `Cookie`) and methods (`GET, POST, PUT, DELETE, OPTIONS`).
 
 ---
 
-## 7. Build and Deployment Instructions
+## 8. Architectural Note: Account Balance Synchronization
+
+In the current FinTrack implementation:
+- `accounts.balance` represents the current balance snapshot as configured by the user upon account creation or during manual balance reconciliation.
+- Creating, updating, or deleting a record in `transactions` **operates strictly on the `transactions` table** and does not alter `accounts.balance`.
+- This ensures personal finance reconciliation against real-world bank statements without requiring opening-balance transactions. For automated ledger balances, future releases will introduce database triggers (`AFTER INSERT/UPDATE/DELETE ON transactions`) and row locking.
+
+---
+
+## 9. Build and Deployment Instructions
 
 1. Ensure the PostgreSQL JDBC driver (`postgresql-42.7.13.jar`) is in `backend/WEB-INF/lib/`.
 2. Compile Java classes:
@@ -226,3 +263,14 @@ Cross-Origin Resource Sharing is managed by [backend/src/filter/CorsFilter.java]
    ```text
    http://localhost:8080/fintrack/api/...
    ```
+
+---
+
+## 10. Troubleshooting
+
+| Symptom | Cause | Solution |
+| :--- | :--- | :--- |
+| `ClassNotFoundException: org.postgresql.Driver` | JDBC driver JAR not in classpath | Place `postgresql-42.7.x.jar` into `backend/WEB-INF/lib/` or Tomcat's `lib/`. |
+| `PSQLException: Connection refused` | PostgreSQL service not running or port incorrect | Start PostgreSQL service (port 5432) and verify with `pg_isready`. |
+| `401 Unauthorized` on API call | No active session cookie or session expired | Authenticate via `POST /api/auth/login` first; ensure browser includes credentials. |
+| CORS error in browser console | Origin not matching server filter | Serve frontend from `http://localhost:5500`. |

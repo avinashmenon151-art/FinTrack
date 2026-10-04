@@ -1,1 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Savings Goals – FinTrack</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
 
+  <!-- Sticky Top Header -->
+  <header class="dashboard-header">
+    <div class="header-container">
+      <div class="header-brand">
+        <div class="header-logo">₹</div>
+        <h1>FinTrack</h1>
+      </div>
+
+      <div class="header-actions">
+        <div class="user-pill">
+          <div id="userAvatar" class="user-avatar">U</div>
+          <span id="userName">User</span>
+        </div>
+        <button id="logoutBtn" class="btn btn-secondary" title="Sign out of FinTrack">
+          Sign Out
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Menu Bar -->
+  <nav class="dashboard-nav">
+    <div class="nav-container">
+      <a href="dashboard.html" class="nav-link">Dashboard</a>
+      <a href="accounts.html" class="nav-link">Accounts</a>
+      <a href="transactions.html" class="nav-link">Transactions</a>
+      <a href="categories.html" class="nav-link">Categories</a>
+      <a href="budgets.html" class="nav-link">Budgets</a>
+      <a href="savings-goals.html" class="nav-link active">Savings Goals</a>
+    </div>
+  </nav>
+
+  <!-- Main Content Body -->
+  <main class="dashboard-main">
+    <!-- Feedback Toast Notification -->
+    <div id="pageToast" class="alert alert-success" style="display: none;" role="status"></div>
+
+    <!-- Page Header & Action Controls -->
+    <div class="page-header">
+      <div class="page-title">
+        <h2>Savings Goals</h2>
+        <p>Set monetary targets, monitor saved progress, and accomplish your financial milestones</p>
+      </div>
+      <button id="addGoalBtn" class="btn btn-primary">
+        + Create Savings Goal
+      </button>
+    </div>
+
+    <!-- Summary Overview Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-title">Active Goals</span>
+          <span class="table-badge badge-income">Active</span>
+        </div>
+        <div id="activeGoalsCount" class="stat-value">0</div>
+        <div class="stat-meta">Ongoing savings targets</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-title">Total Target</span>
+          <span class="table-badge badge-system">Target</span>
+        </div>
+        <div id="totalActiveTarget" class="stat-value stat-income">₹0.00</div>
+        <div class="stat-meta">Target sum of active goals</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-title">Total Saved</span>
+          <span class="table-badge badge-custom">Saved</span>
+        </div>
+        <div id="totalActiveSaved" class="stat-value" style="color: var(--accent-green);">₹0.00</div>
+        <div class="stat-meta">Accumulated in active goals</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-title">Overall Progress</span>
+          <span class="table-badge badge-system">Progress</span>
+        </div>
+        <div id="overallProgressPercent" class="stat-value">0%</div>
+        <div class="stat-meta">Saved vs Target ratio</div>
+      </div>
+    </div>
+    <div class="summary-notice">
+      * Summary metrics represent active goals. Does not mutate or transfer account balances.
+    </div>
+
+    <!-- Loading State -->
+    <div id="loadingIndicator" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>Loading savings goals...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="content-section" style="display: none;">
+      <div class="placeholder-box">
+        <div class="placeholder-icon">🎯</div>
+        <h4>No savings goals found</h4>
+        <p class="text-secondary" style="margin-bottom: 1.25rem;">
+          You haven't defined any savings goals yet. Create your first goal to track your financial ambitions and monitor your progress.
+        </p>
+        <button id="emptyCreateGoalBtn" class="btn btn-primary">
+          + Create Savings Goal
+        </button>
+      </div>
+    </div>
+
+    <!-- Savings Goals Responsive Grid -->
+    <div id="goalsGrid" class="goals-grid" style="display: none;">
+      <!-- Populated dynamically by savings-goals.js -->
+    </div>
+  </main>
+
+  <!-- Add / Edit Savings Goal Modal -->
+  <div id="goalModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalTitle">Create Savings Goal</h3>
+        <button type="button" id="closeGoalModalBtn" class="modal-close-btn" aria-label="Close modal">&times;</button>
+      </div>
+
+      <form id="goalForm" novalidate>
+        <div class="modal-body">
+          <!-- Inline Modal Error Alert -->
+          <div id="modalError" class="alert alert-error" style="display: none;" role="alert"></div>
+
+          <!-- Goal Name -->
+          <div class="form-group">
+            <label for="goalName">Goal Name <span class="text-muted">*</span></label>
+            <input 
+              type="text" 
+              id="goalName" 
+              class="form-control" 
+              placeholder="e.g. Emergency Fund, Vacation Trip, New Laptop" 
+              maxlength="100" 
+              required
+            >
+          </div>
+
+          <!-- Target Amount -->
+          <div class="form-group">
+            <label for="targetAmount">Target Amount (₹) <span class="text-muted">*</span></label>
+            <input 
+              type="number" 
+              id="targetAmount" 
+              class="form-control" 
+              step="0.01" 
+              min="0.01" 
+              placeholder="0.00" 
+              required
+            >
+          </div>
+
+          <!-- Saved Amount -->
+          <div class="form-group">
+            <label for="savedAmount">Saved Amount (₹) <span class="text-muted">*</span></label>
+            <input 
+              type="number" 
+              id="savedAmount" 
+              class="form-control" 
+              step="0.01" 
+              min="0.00" 
+              value="0.00" 
+              placeholder="0.00" 
+              required
+            >
+            <div class="form-text">Current saved balance towards this goal (minimum 0).</div>
+          </div>
+
+          <!-- Target Date -->
+          <div class="form-group">
+            <label for="targetDate">Target Date</label>
+            <input 
+              type="date" 
+              id="targetDate" 
+              class="form-control"
+            >
+            <div class="form-text">Optional deadline to achieve this target.</div>
+          </div>
+
+          <!-- Linked Account -->
+          <div class="form-group">
+            <label for="linkedAccount">Linked Funding Account</label>
+            <select id="linkedAccount" class="form-control">
+              <option value="">No linked account</option>
+            </select>
+            <div class="form-text">Optional financial account associated with this savings plan.</div>
+          </div>
+
+          <!-- Status -->
+          <div class="form-group">
+            <label for="goalStatus">Status <span class="text-muted">*</span></label>
+            <select id="goalStatus" class="form-control" required>
+              <option value="Active" selected>Active</option>
+              <option value="Completed">Completed</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="cancelGoalBtn" class="btn btn-secondary">Cancel</button>
+          <button type="submit" id="saveGoalBtn" class="btn btn-primary">Save Goal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Quick Update Saved Amount Modal -->
+  <div id="quickUpdateModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3>Update Saved Amount</h3>
+        <button type="button" id="closeQuickUpdateModalBtn" class="modal-close-btn" aria-label="Close modal">&times;</button>
+      </div>
+
+      <form id="quickUpdateForm" novalidate>
+        <div class="modal-body">
+          <div id="quickUpdateError" class="alert alert-error" style="display: none;" role="alert"></div>
+
+          <div style="margin-bottom: 1rem; padding: 0.75rem 1rem; background: rgba(15, 23, 42, 0.5); border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+            <div id="quickGoalName" style="font-weight: 600; font-size: 1.05rem; margin-bottom: 0.25rem;"></div>
+            <div id="quickTargetInfo" class="text-muted" style="font-size: 0.85rem;"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="quickSavedAmount">New Saved Amount (₹) <span class="text-muted">*</span></label>
+            <input 
+              type="number" 
+              id="quickSavedAmount" 
+              class="form-control" 
+              step="0.01" 
+              min="0.00" 
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="quickGoalStatus">Goal Status</label>
+            <select id="quickGoalStatus" class="form-control">
+              <option value="Active">Active</option>
+              <option value="Completed">Completed</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="cancelQuickUpdateBtn" class="btn btn-secondary">Cancel</button>
+          <button type="submit" id="saveQuickUpdateBtn" class="btn btn-primary">Update Amount</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Goal Confirmation Modal -->
+  <div id="deleteGoalModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Confirm Goal Deletion</h3>
+        <button type="button" id="closeDeleteGoalModalBtn" class="modal-close-btn" aria-label="Close modal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <p id="deleteGoalConfirmMessage" style="margin-bottom: 0.75rem;">
+          Are you sure you want to delete this savings goal? This action cannot be undone.
+        </p>
+        <div id="deleteGoalDetails" class="placeholder-box" style="padding: 1rem; text-align: left; font-size: 0.85rem; margin-bottom: 0.5rem;">
+          <!-- Dynamically populated goal details -->
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" id="cancelDeleteGoalBtn" class="btn btn-secondary">Cancel</button>
+        <button type="button" id="confirmDeleteGoalBtn" class="btn btn-danger">Delete Goal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/savings-goals.js"></script>
+</body>
+</html>

@@ -47,100 +47,91 @@
       <p id="userEmail" class="text-muted">Loading account details...</p>
     </div>
 
-    <!-- Summary Metrics Grid (Step 9 Placeholders) -->
+    <!-- Loading Indicator -->
+    <div id="dashboardLoading" class="loading-container" style="display: none; padding: 1rem 0;">
+      <div class="loading-spinner"></div>
+      <p>Loading financial overview...</p>
+    </div>
+
+    <!-- Summary Metrics Grid with Live Backend Data -->
     <div class="stats-grid">
       <!-- Total Balance Card -->
       <div class="stat-card">
         <div class="stat-header">
           <span class="stat-title">Total Balance</span>
-          <span class="badge badge-warning">Coming Soon</span>
+          <span class="table-badge badge-income">Accounts</span>
         </div>
-        <div class="stat-value">₹ --.--</div>
-        <div class="stat-meta">Coming in next step (Account integration)</div>
+        <div id="metricTotalBalance" class="stat-value">₹0.00</div>
+        <div id="metricTotalBalanceMeta" class="stat-meta">Across accounts</div>
       </div>
 
       <!-- Monthly Income Card -->
       <div class="stat-card">
         <div class="stat-header">
           <span class="stat-title">Monthly Income</span>
-          <span class="badge badge-warning">Coming Soon</span>
+          <span class="table-badge badge-income">This Month</span>
         </div>
-        <div class="stat-value">₹ --.--</div>
-        <div class="stat-meta">Coming in next step (Transaction tracking)</div>
+        <div id="metricMonthIncome" class="stat-value stat-income">₹0.00</div>
+        <div class="stat-meta">Current calendar month</div>
       </div>
 
       <!-- Monthly Expenses Card -->
       <div class="stat-card">
         <div class="stat-header">
           <span class="stat-title">Monthly Expenses</span>
-          <span class="badge badge-warning">Coming Soon</span>
+          <span class="table-badge badge-expense">This Month</span>
         </div>
-        <div class="stat-value">₹ --.--</div>
-        <div class="stat-meta">Coming in next step (Budget tracking)</div>
+        <div id="metricMonthExpense" class="stat-value stat-expense">₹0.00</div>
+        <div class="stat-meta">Current calendar month</div>
       </div>
 
       <!-- Active Savings Goals Card -->
       <div class="stat-card">
         <div class="stat-header">
           <span class="stat-title">Active Goals</span>
-          <span class="badge badge-warning">Coming Soon</span>
+          <span class="table-badge badge-custom">Goals</span>
         </div>
-        <div class="stat-value">--</div>
-        <div class="stat-meta">Coming in next step (Savings goals)</div>
+        <div id="metricActiveGoals" class="stat-value">0</div>
+        <div id="metricActiveGoalsMeta" class="stat-meta">Ongoing savings targets</div>
       </div>
     </div>
 
-    <!-- Overview Content Block -->
-    <section class="content-section">
-      <div class="section-header">
-        <h3>System Overview & Authentication Status</h3>
-        <span class="badge">Session Active</span>
-      </div>
+    <!-- Quick Actions Navigation Row -->
+    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 2rem;">
+      <a href="transactions.html" class="btn btn-primary btn-sm">+ Add Transaction</a>
+      <a href="accounts.html" class="btn btn-secondary btn-sm">+ Add Account</a>
+      <a href="budgets.html" class="btn btn-secondary btn-sm">+ Create Budget</a>
+      <a href="savings-goals.html" class="btn btn-secondary btn-sm">+ Set Savings Goal</a>
+    </div>
 
-      <div class="placeholder-box">
-        <div class="placeholder-icon">🛡️</div>
-        <h4>Authentication & Session Active</h4>
-        <p class="text-secondary">
-          You are authenticated via a secure HTTP session managed by the Java backend. 
-          Financial CRUD operations (Accounts, Transactions, Categories, Budgets, and Savings Goals) 
-          will be connected to this authenticated session in upcoming steps.
-        </p>
-      </div>
-    </section>
+    <!-- Two-Column Overview Section -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+      <!-- Recent Transactions -->
+      <section class="content-section" style="margin-bottom: 0;">
+        <div class="section-header">
+          <h3>Recent Transactions</h3>
+          <a href="transactions.html" style="font-size: 0.85rem;">View All</a>
+        </div>
+        <div id="recentTransactionsList">
+          <!-- Dynamically populated by dashboard.js -->
+        </div>
+      </section>
+
+      <!-- Accounts Overview -->
+      <section class="content-section" style="margin-bottom: 0;">
+        <div class="section-header">
+          <h3>Accounts Snapshot</h3>
+          <a href="accounts.html" style="font-size: 0.85rem;">Manage</a>
+        </div>
+        <div id="accountsOverviewList">
+          <!-- Dynamically populated by dashboard.js -->
+        </div>
+      </section>
+    </div>
   </main>
 
   <script src="js/api.js"></script>
   <script src="js/auth.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", async () => {
-      // 1. Session Guard: verify authenticated session via /api/auth/me
-      const user = await requireAuth();
-      if (!user) {
-        // Redirection handled inside requireAuth()
-        return;
-      }
-
-      // 2. Render authenticated user info
-      const displayName = user.name || "FinTrack User";
-      document.getElementById("userName").textContent = displayName;
-      document.getElementById("welcomeUserName").textContent = displayName;
-      document.getElementById("userEmail").textContent = user.email || "";
-
-      // Set avatar initial
-      const initial = displayName.trim().charAt(0).toUpperCase() || "U";
-      document.getElementById("userAvatar").textContent = initial;
-
-      // 3. Make dashboard visible
-      document.getElementById("dashboardBody").style.display = "flex";
-
-      // 4. Logout handler
-      const logoutBtn = document.getElementById("logoutBtn");
-      logoutBtn.addEventListener("click", async () => {
-        logoutBtn.disabled = true;
-        logoutBtn.textContent = "Signing out...";
-        await logout();
-      });
-    });
-  </script>
+  <script src="js/dashboard.js"></script>
 </body>
 </html>

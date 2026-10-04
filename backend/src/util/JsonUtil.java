@@ -337,14 +337,22 @@ public class JsonUtil {
         if (obj instanceof SavingsGoal) {
             SavingsGoal sg = (SavingsGoal) obj;
             return "{" +
+                    "\"goal_id\":" + toJson(sg.getGoalId()) + "," +
                     "\"goalId\":" + toJson(sg.getGoalId()) + "," +
+                    "\"user_id\":" + toJson(sg.getUserId()) + "," +
                     "\"userId\":" + toJson(sg.getUserId()) + "," +
+                    "\"account_id\":" + toJson(sg.getAccountId()) + "," +
                     "\"accountId\":" + toJson(sg.getAccountId()) + "," +
+                    "\"goal_name\":" + toJson(sg.getGoalName()) + "," +
                     "\"goalName\":" + toJson(sg.getGoalName()) + "," +
+                    "\"target_amount\":" + toJson(sg.getTargetAmount()) + "," +
                     "\"targetAmount\":" + toJson(sg.getTargetAmount()) + "," +
+                    "\"saved_amount\":" + toJson(sg.getSavedAmount()) + "," +
                     "\"savedAmount\":" + toJson(sg.getSavedAmount()) + "," +
+                    "\"target_date\":" + toJson(sg.getTargetDate()) + "," +
                     "\"targetDate\":" + toJson(sg.getTargetDate()) + "," +
                     "\"status\":" + toJson(sg.getStatus()) + "," +
+                    "\"created_at\":" + toJson(sg.getCreatedAt()) + "," +
                     "\"createdAt\":" + toJson(sg.getCreatedAt()) +
                     "}";
         }
