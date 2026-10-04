@@ -1,1 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Account – FinTrack</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="auth-page">
 
+  <div class="auth-container">
+    <div class="auth-brand">
+      <div class="auth-logo">₹</div>
+      <h1>FinTrack</h1>
+      <p>Personal Finance Management System</p>
+    </div>
+
+    <div class="auth-card">
+      <h2>Create Your Account</h2>
+
+      <!-- Inline Error Alert Message -->
+      <div id="errorAlert" class="alert alert-error" style="display: none;" role="alert">
+        <span class="alert-icon">⚠️</span>
+        <span id="errorMessage" class="alert-text"></span>
+      </div>
+
+      <!-- Inline Success Alert Message -->
+      <div id="successAlert" class="alert alert-success" style="display: none;" role="alert">
+        <span class="alert-icon">✓</span>
+        <span id="successMessage" class="alert-text"></span>
+      </div>
+
+      <form id="registerForm" novalidate>
+        <div class="form-group">
+          <label for="name">Full Name <span class="text-muted">*</span></label>
+          <input 
+            type="text" 
+            id="name" 
+            name="name" 
+            class="form-control" 
+            placeholder="Avinash Menon" 
+            required 
+            autocomplete="name"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email Address <span class="text-muted">*</span></label>
+          <input 
+            type="email" 
+            id="email" 
+            name="email" 
+            class="form-control" 
+            placeholder="avinash@example.com" 
+            required 
+            autocomplete="email"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="phoneNumber">Phone Number <span class="text-muted">(Optional)</span></label>
+          <input 
+            type="tel" 
+            id="phoneNumber" 
+            name="phone_number" 
+            class="form-control" 
+            placeholder="+91 9876543210" 
+            autocomplete="tel"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password <span class="text-muted">*</span></label>
+          <input 
+            type="password" 
+            id="password" 
+            name="password" 
+            class="form-control" 
+            placeholder="••••••••" 
+            required 
+            autocomplete="new-password"
+          >
+          <div class="form-text">Must be at least 6 characters.</div>
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">Confirm Password <span class="text-muted">*</span></label>
+          <input 
+            type="password" 
+            id="confirmPassword" 
+            name="confirm_password" 
+            class="form-control" 
+            placeholder="••••••••" 
+            required 
+            autocomplete="new-password"
+          >
+        </div>
+
+        <button type="submit" id="registerBtn" class="btn btn-primary btn-block">
+          Create Account
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        Already have an account? <a href="index.html">Sign In</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      // Redirect if session already exists
+      await redirectIfAuthenticated();
+
+      const form = document.getElementById("registerForm");
+      const nameInput = document.getElementById("name");
+      const emailInput = document.getElementById("email");
+      const phoneInput = document.getElementById("phoneNumber");
+      const passwordInput = document.getElementById("password");
+      const confirmPasswordInput = document.getElementById("confirmPassword");
+      const registerBtn = document.getElementById("registerBtn");
+      
+      const errorAlert = document.getElementById("errorAlert");
+      const errorMessage = document.getElementById("errorMessage");
+      const successAlert = document.getElementById("successAlert");
+      const successMessage = document.getElementById("successMessage");
+
+      function showError(msg) {
+        successAlert.style.display = "none";
+        errorMessage.textContent = msg;
+        errorAlert.style.display = "flex";
+      }
+
+      function showSuccess(msg) {
+        errorAlert.style.display = "none";
+        successMessage.textContent = msg;
+        successAlert.style.display = "flex";
+      }
+
+      function hideAlerts() {
+        errorAlert.style.display = "none";
+        successAlert.style.display = "none";
+      }
+
+      function isValidEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      }
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        hideAlerts();
+
+        const name = nameInput.value.trim();
+        const email = emailInput.value.trim();
+        const phoneNumber = phoneInput.value.trim();
+        const password = passwordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+
+        // Client-side validations
+        if (!name) {
+          showError("Full name is required.");
+          nameInput.focus();
+          return;
+        }
+
+        if (!email || !isValidEmail(email)) {
+          showError("Please enter a valid email address.");
+          emailInput.focus();
+          return;
+        }
+
+        if (!password) {
+          showError("Password is required.");
+          passwordInput.focus();
+          return;
+        }
+
+        if (password.length < 6) {
+          showError("Password must be at least 6 characters long.");
+          passwordInput.focus();
+          return;
+        }
+
+        if (password !== confirmPassword) {
+          showError("Passwords do not match. Please re-enter.");
+          confirmPasswordInput.focus();
+          return;
+        }
+
+        try {
+          registerBtn.disabled = true;
+          registerBtn.textContent = "Creating Account...";
+
+          await register({
+            name,
+            email,
+            password,
+            phone_number: phoneNumber
+          });
+
+          // Show success message and redirect
+          showSuccess("Account created successfully. Redirecting to login...");
+          form.reset();
+
+          setTimeout(() => {
+            window.location.href = "index.html";
+          }, 1500);
+
+        } catch (error) {
+          registerBtn.disabled = false;
+          registerBtn.textContent = "Create Account";
+
+          if (error.status === 409) {
+            showError("An account with this email already exists.");
+          } else {
+            showError(error.message || "Failed to create account. Please try again.");
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>

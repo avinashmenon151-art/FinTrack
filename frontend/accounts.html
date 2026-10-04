@@ -1,1 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accounts – FinTrack</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
 
+  <!-- Sticky Top Header -->
+  <header class="dashboard-header">
+    <div class="header-container">
+      <div class="header-brand">
+        <div class="header-logo">₹</div>
+        <h1>FinTrack</h1>
+      </div>
+
+      <div class="header-actions">
+        <div class="user-pill">
+          <div id="userAvatar" class="user-avatar">U</div>
+          <span id="userName">User</span>
+        </div>
+        <button id="logoutBtn" class="btn btn-secondary" title="Sign out of FinTrack">
+          Sign Out
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Menu Bar -->
+  <nav class="dashboard-nav">
+    <div class="nav-container">
+      <a href="dashboard.html" class="nav-link">Dashboard</a>
+      <a href="accounts.html" class="nav-link active">Accounts</a>
+      <a href="transactions.html" class="nav-link">Transactions</a>
+      <a href="categories.html" class="nav-link">Categories</a>
+      <a href="budgets.html" class="nav-link">Budgets</a>
+      <a href="savings-goals.html" class="nav-link">Savings Goals</a>
+    </div>
+  </nav>
+
+  <!-- Main Content Body -->
+  <main class="dashboard-main">
+    <!-- Feedback Toast Notification -->
+    <div id="pageToast" class="alert alert-success" style="display: none;" role="status"></div>
+
+    <!-- Page Header & Action -->
+    <div class="page-header">
+      <div class="page-title">
+        <h2>Financial Accounts</h2>
+        <p>Manage your checking, savings, credit cards, and cash balances</p>
+      </div>
+      <button id="addAccountBtn" class="btn btn-primary">
+        + Add Account
+      </button>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loadingIndicator" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>Loading accounts...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="content-section" style="display: none;">
+      <div class="placeholder-box">
+        <div class="placeholder-icon">💳</div>
+        <h4>No accounts yet</h4>
+        <p class="text-secondary" style="margin-bottom: 1.25rem;">
+          Add your first financial account to start tracking balances and transactions.
+        </p>
+        <button id="emptyAddBtn" class="btn btn-primary">
+          + Add Account
+        </button>
+      </div>
+    </div>
+
+    <!-- Accounts Cards Grid -->
+    <div id="accountsGrid" class="accounts-grid" style="display: none;">
+      <!-- Populated dynamically by accounts.js -->
+    </div>
+  </main>
+
+  <!-- Add / Edit Account Modal -->
+  <div id="accountModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalTitle">Add Financial Account</h3>
+        <button type="button" id="closeAccountModalBtn" class="modal-close-btn" aria-label="Close modal">&times;</button>
+      </div>
+
+      <form id="accountForm" novalidate>
+        <div class="modal-body">
+          <!-- Inline Modal Error Alert -->
+          <div id="modalError" class="alert alert-error" style="display: none;" role="alert"></div>
+
+          <div class="form-group">
+            <label for="accountName">Account Name <span class="text-muted">*</span></label>
+            <input 
+              type="text" 
+              id="accountName" 
+              class="form-control" 
+              placeholder="e.g. HDFC Salary Account, Cash Wallet" 
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="accountType">Account Type <span class="text-muted">*</span></label>
+            <select id="accountType" class="form-control" required>
+              <option value="Checking">Checking</option>
+              <option value="Savings" selected>Savings</option>
+              <option value="Cash">Cash</option>
+              <option value="Credit Card">Credit Card</option>
+              <option value="Investment">Investment</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="accountBalance">Current Balance (₹) <span class="text-muted">*</span></label>
+            <input 
+              type="number" 
+              id="accountBalance" 
+              class="form-control" 
+              step="0.01" 
+              placeholder="0.00" 
+              required
+            >
+            <div class="form-text">Enter starting balance. Can be zero or negative for credit cards.</div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="cancelAccountBtn" class="btn btn-secondary">Cancel</button>
+          <button type="submit" id="saveAccountBtn" class="btn btn-primary">Save Account</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Account Confirmation Modal -->
+  <div id="deleteModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Confirm Account Deletion</h3>
+        <button type="button" id="closeDeleteModalBtn" class="modal-close-btn" aria-label="Close modal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <p id="deleteConfirmMessage" style="margin-bottom: 0.5rem;"></p>
+        <p class="text-muted" style="font-size: 0.85rem;">
+          Warning: If this account is linked to transactions or savings goals, deletion may be rejected by the server to protect your data.
+        </p>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" id="cancelDeleteBtn" class="btn btn-secondary">Cancel</button>
+        <button type="button" id="confirmDeleteBtn" class="btn btn-danger">Delete Account</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/accounts.js"></script>
+</body>
+</html>

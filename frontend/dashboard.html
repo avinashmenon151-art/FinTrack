@@ -1,1 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard – FinTrack</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body id="dashboardBody" style="display: none;">
 
+  <!-- Sticky Top Header -->
+  <header class="dashboard-header">
+    <div class="header-container">
+      <div class="header-brand">
+        <div class="header-logo">₹</div>
+        <h1>FinTrack</h1>
+      </div>
+
+      <div class="header-actions">
+        <div class="user-pill">
+          <div id="userAvatar" class="user-avatar">U</div>
+          <span id="userName">User</span>
+        </div>
+        <button id="logoutBtn" class="btn btn-secondary" title="Sign out of FinTrack">
+          Sign Out
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Menu Bar -->
+  <nav class="dashboard-nav">
+    <div class="nav-container">
+      <a href="dashboard.html" class="nav-link active">Dashboard</a>
+      <a href="accounts.html" class="nav-link">Accounts</a>
+      <a href="transactions.html" class="nav-link">Transactions</a>
+      <a href="categories.html" class="nav-link">Categories</a>
+      <a href="budgets.html" class="nav-link">Budgets</a>
+      <a href="savings-goals.html" class="nav-link">Savings Goals</a>
+    </div>
+  </nav>
+
+  <!-- Main Content Body -->
+  <main class="dashboard-main">
+    <div class="welcome-banner">
+      <h2>Welcome back, <span id="welcomeUserName">FinTrack User</span>!</h2>
+      <p id="userEmail" class="text-muted">Loading account details...</p>
+    </div>
+
+    <!-- Summary Metrics Grid (Step 9 Placeholders) -->
+    <div class="stats-grid">
+      <!-- Total Balance Card -->
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-title">Total Balance</span>
+          <span class="badge badge-warning">Coming Soon</span>
+        </div>
+        <div class="stat-value">₹ --.--</div>
+        <div class="stat-meta">Coming in next step (Account integration)</div>
+      </div>
+
+      <!-- Monthly Income Card -->
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-title">Monthly Income</span>
+          <span class="badge badge-warning">Coming Soon</span>
+        </div>
+        <div class="stat-value">₹ --.--</div>
+        <div class="stat-meta">Coming in next step (Transaction tracking)</div>
+      </div>
+
+      <!-- Monthly Expenses Card -->
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-title">Monthly Expenses</span>
+          <span class="badge badge-warning">Coming Soon</span>
+        </div>
+        <div class="stat-value">₹ --.--</div>
+        <div class="stat-meta">Coming in next step (Budget tracking)</div>
+      </div>
+
+      <!-- Active Savings Goals Card -->
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-title">Active Goals</span>
+          <span class="badge badge-warning">Coming Soon</span>
+        </div>
+        <div class="stat-value">--</div>
+        <div class="stat-meta">Coming in next step (Savings goals)</div>
+      </div>
+    </div>
+
+    <!-- Overview Content Block -->
+    <section class="content-section">
+      <div class="section-header">
+        <h3>System Overview & Authentication Status</h3>
+        <span class="badge">Session Active</span>
+      </div>
+
+      <div class="placeholder-box">
+        <div class="placeholder-icon">🛡️</div>
+        <h4>Authentication & Session Active</h4>
+        <p class="text-secondary">
+          You are authenticated via a secure HTTP session managed by the Java backend. 
+          Financial CRUD operations (Accounts, Transactions, Categories, Budgets, and Savings Goals) 
+          will be connected to this authenticated session in upcoming steps.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      // 1. Session Guard: verify authenticated session via /api/auth/me
+      const user = await requireAuth();
+      if (!user) {
+        // Redirection handled inside requireAuth()
+        return;
+      }
+
+      // 2. Render authenticated user info
+      const displayName = user.name || "FinTrack User";
+      document.getElementById("userName").textContent = displayName;
+      document.getElementById("welcomeUserName").textContent = displayName;
+      document.getElementById("userEmail").textContent = user.email || "";
+
+      // Set avatar initial
+      const initial = displayName.trim().charAt(0).toUpperCase() || "U";
+      document.getElementById("userAvatar").textContent = initial;
+
+      // 3. Make dashboard visible
+      document.getElementById("dashboardBody").style.display = "flex";
+
+      // 4. Logout handler
+      const logoutBtn = document.getElementById("logoutBtn");
+      logoutBtn.addEventListener("click", async () => {
+        logoutBtn.disabled = true;
+        logoutBtn.textContent = "Signing out...";
+        await logout();
+      });
+    });
+  </script>
+</body>
+</html>

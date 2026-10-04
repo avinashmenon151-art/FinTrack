@@ -1,1 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transactions – FinTrack</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
 
+  <!-- Sticky Top Header -->
+  <header class="dashboard-header">
+    <div class="header-container">
+      <div class="header-brand">
+        <div class="header-logo">₹</div>
+        <h1>FinTrack</h1>
+      </div>
+
+      <div class="header-actions">
+        <div class="user-pill">
+          <div id="userAvatar" class="user-avatar">U</div>
+          <span id="userName">User</span>
+        </div>
+        <button id="logoutBtn" class="btn btn-secondary" title="Sign out of FinTrack">
+          Sign Out
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Menu Bar -->
+  <nav class="dashboard-nav">
+    <div class="nav-container">
+      <a href="dashboard.html" class="nav-link">Dashboard</a>
+      <a href="accounts.html" class="nav-link">Accounts</a>
+      <a href="transactions.html" class="nav-link active">Transactions</a>
+      <a href="categories.html" class="nav-link">Categories</a>
+      <a href="budgets.html" class="nav-link">Budgets</a>
+      <a href="savings-goals.html" class="nav-link">Savings Goals</a>
+    </div>
+  </nav>
+
+  <!-- Main Content Body -->
+  <main class="dashboard-main">
+    <!-- Feedback Toast Notification -->
+    <div id="pageToast" class="alert alert-success" style="display: none;" role="status"></div>
+
+    <!-- Page Header & Action Controls -->
+    <div class="page-header">
+      <div class="page-title">
+        <h2>Transactions</h2>
+        <p>Record, manage, and filter your income and expenses across all accounts</p>
+      </div>
+      <button id="addTransactionBtn" class="btn btn-primary">
+        + Add Transaction
+      </button>
+    </div>
+
+    <!-- Summary Totals Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-title">Total Income</span>
+          <span class="table-badge badge-income">Income</span>
+        </div>
+        <div id="totalIncome" class="stat-value stat-income">₹0.00</div>
+        <div class="stat-meta">Sum of displayed income</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-title">Total Expenses</span>
+          <span class="table-badge badge-expense">Expense</span>
+        </div>
+        <div id="totalExpenses" class="stat-value stat-expense">₹0.00</div>
+        <div class="stat-meta">Sum of displayed expenses</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <span class="stat-title">Net Total</span>
+          <span class="table-badge badge-system">Display</span>
+        </div>
+        <div id="netAmount" class="stat-value">₹0.00</div>
+        <div class="stat-meta">Income minus expenses</div>
+      </div>
+    </div>
+    <div class="summary-notice">
+      * Display totals reflect the currently filtered transactions list. Account balances remain unchanged.
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-card">
+      <form id="filterForm" novalidate>
+        <div class="filter-grid">
+          <div class="filter-group-item">
+            <label for="filterAccount">Account</label>
+            <select id="filterAccount" class="form-control">
+              <option value="">All Accounts</option>
+            </select>
+          </div>
+
+          <div class="filter-group-item">
+            <label for="filterType">Transaction Type</label>
+            <select id="filterType" class="form-control">
+              <option value="">All Types</option>
+              <option value="Income">Income</option>
+              <option value="Expense">Expense</option>
+            </select>
+          </div>
+
+          <div class="filter-group-item">
+            <label for="filterStartDate">Start Date</label>
+            <input type="date" id="filterStartDate" class="form-control">
+          </div>
+
+          <div class="filter-group-item">
+            <label for="filterEndDate">End Date</label>
+            <input type="date" id="filterEndDate" class="form-control">
+          </div>
+
+          <div class="filter-actions">
+            <button type="submit" id="applyFiltersBtn" class="btn btn-primary btn-sm">
+              Apply Filters
+            </button>
+            <button type="button" id="clearFiltersBtn" class="btn btn-secondary btn-sm">
+              Clear Filters
+            </button>
+          </div>
+        </div>
+
+        <div id="filterError" class="alert alert-error" style="display: none; margin-top: 1rem;" role="alert"></div>
+      </form>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loadingIndicator" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>Loading transactions...</p>
+    </div>
+
+    <!-- Initial Empty State (No transactions at all) -->
+    <div id="emptyState" class="content-section" style="display: none;">
+      <div class="placeholder-box">
+        <div class="placeholder-icon">💸</div>
+        <h4>No transactions found</h4>
+        <p class="text-secondary" style="margin-bottom: 1.25rem;">
+          You haven't recorded any transactions yet. Add your first transaction to start tracking income and expenses.
+        </p>
+        <button id="emptyAddBtn" class="btn btn-primary">
+          + Add Transaction
+        </button>
+      </div>
+    </div>
+
+    <!-- Filtered Empty State (Transactions exist, but none match filters) -->
+    <div id="filteredEmptyState" class="content-section" style="display: none;">
+      <div class="placeholder-box">
+        <div class="placeholder-icon">🔍</div>
+        <h4>No transactions match your filters</h4>
+        <p class="text-secondary" style="margin-bottom: 1.25rem;">
+          Try adjusting your date range, account, or type filters to see transactions.
+        </p>
+        <button id="emptyClearFiltersBtn" class="btn btn-secondary">
+          Clear Filters
+        </button>
+      </div>
+    </div>
+
+    <!-- Transactions Responsive Table Wrapper -->
+    <div id="transactionsTableWrapper" class="transaction-table-wrapper" style="display: none;">
+      <table class="transaction-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Category</th>
+            <th>Account</th>
+            <th>Description</th>
+            <th style="text-align: right;">Amount</th>
+            <th style="text-align: center;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="transactionsTableBody">
+          <!-- Populated dynamically by transactions.js -->
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Add / Edit Transaction Modal -->
+  <div id="transactionModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalTitle">Add Transaction</h3>
+        <button type="button" id="closeTxModalBtn" class="modal-close-btn" aria-label="Close modal">&times;</button>
+      </div>
+
+      <form id="transactionForm" novalidate>
+        <div class="modal-body">
+          <!-- Inline Modal Error Alert -->
+          <div id="modalError" class="alert alert-error" style="display: none;" role="alert"></div>
+
+          <!-- Transaction Type -->
+          <div class="form-group">
+            <label for="txType">Transaction Type <span class="text-muted">*</span></label>
+            <select id="txType" class="form-control" required>
+              <option value="Expense" selected>Expense</option>
+              <option value="Income">Income</option>
+            </select>
+          </div>
+
+          <!-- Account -->
+          <div class="form-group">
+            <label for="txAccount">Account <span class="text-muted">*</span></label>
+            <select id="txAccount" class="form-control" required>
+              <option value="">Select Account</option>
+            </select>
+          </div>
+
+          <!-- Category -->
+          <div class="form-group">
+            <label for="txCategory">Category <span class="text-muted">*</span></label>
+            <select id="txCategory" class="form-control" required>
+              <option value="">Select Category</option>
+            </select>
+            <div class="form-text">Categories are filtered by the selected transaction type.</div>
+          </div>
+
+          <!-- Amount -->
+          <div class="form-group">
+            <label for="txAmount">Amount (₹) <span class="text-muted">*</span></label>
+            <input 
+              type="number" 
+              id="txAmount" 
+              class="form-control" 
+              step="0.01" 
+              min="0.01" 
+              placeholder="0.00" 
+              required
+            >
+          </div>
+
+          <!-- Transaction Date -->
+          <div class="form-group">
+            <label for="txDate">Transaction Date <span class="text-muted">*</span></label>
+            <input 
+              type="date" 
+              id="txDate" 
+              class="form-control" 
+              required
+            >
+          </div>
+
+          <!-- Description -->
+          <div class="form-group">
+            <label for="txDescription">Description</label>
+            <input 
+              type="text" 
+              id="txDescription" 
+              class="form-control" 
+              placeholder="e.g. Lunch with colleagues, Freelance project" 
+              maxlength="255"
+            >
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="cancelTxBtn" class="btn btn-secondary">Cancel</button>
+          <button type="submit" id="saveTxBtn" class="btn btn-primary">Save Transaction</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Transaction Confirmation Modal -->
+  <div id="deleteModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Confirm Transaction Deletion</h3>
+        <button type="button" id="closeDeleteModalBtn" class="modal-close-btn" aria-label="Close modal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <p id="deleteConfirmMessage" style="margin-bottom: 0.75rem;">
+          Are you sure you want to delete this transaction? This action cannot be undone.
+        </p>
+        <div id="deleteItemDetails" class="placeholder-box" style="padding: 1rem; text-align: left; font-size: 0.85rem; margin-bottom: 0.5rem;">
+          <!-- Dynamically populated transaction details -->
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" id="cancelDeleteBtn" class="btn btn-secondary">Cancel</button>
+        <button type="button" id="confirmDeleteBtn" class="btn btn-danger">Delete Transaction</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/transactions.js"></script>
+</body>
+</html>

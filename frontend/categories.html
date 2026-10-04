@@ -1,1 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Categories – FinTrack</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
 
+  <!-- Sticky Top Header -->
+  <header class="dashboard-header">
+    <div class="header-container">
+      <div class="header-brand">
+        <div class="header-logo">₹</div>
+        <h1>FinTrack</h1>
+      </div>
+
+      <div class="header-actions">
+        <div class="user-pill">
+          <div id="userAvatar" class="user-avatar">U</div>
+          <span id="userName">User</span>
+        </div>
+        <button id="logoutBtn" class="btn btn-secondary" title="Sign out of FinTrack">
+          Sign Out
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Menu Bar -->
+  <nav class="dashboard-nav">
+    <div class="nav-container">
+      <a href="dashboard.html" class="nav-link">Dashboard</a>
+      <a href="accounts.html" class="nav-link">Accounts</a>
+      <a href="transactions.html" class="nav-link">Transactions</a>
+      <a href="categories.html" class="nav-link active">Categories</a>
+      <a href="budgets.html" class="nav-link">Budgets</a>
+      <a href="savings-goals.html" class="nav-link">Savings Goals</a>
+    </div>
+  </nav>
+
+  <!-- Main Content Body -->
+  <main class="dashboard-main">
+    <!-- Feedback Toast Notification -->
+    <div id="pageToast" class="alert alert-success" style="display: none;" role="status"></div>
+
+    <!-- Page Header & Action Controls -->
+    <div class="page-header">
+      <div class="page-title">
+        <h2>Categories Classification</h2>
+        <p>Organize income and expense transactions with system and personal custom categories</p>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+        <!-- Type Filter Buttons -->
+        <div class="filter-group">
+          <button type="button" class="btn-filter active" data-filter="ALL">All</button>
+          <button type="button" class="btn-filter" data-filter="INCOME">Income</button>
+          <button type="button" class="btn-filter" data-filter="EXPENSE">Expense</button>
+        </div>
+
+        <button id="addCategoryBtn" class="btn btn-primary">
+          + Add Category
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loadingIndicator" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>Loading categories...</p>
+    </div>
+
+    <!-- General Empty State (No categories at all returned) -->
+    <div id="generalEmptyState" class="content-section" style="display: none;">
+      <div class="placeholder-box">
+        <div class="placeholder-icon">🏷️</div>
+        <h4>No categories available</h4>
+        <p class="text-secondary" style="margin-bottom: 1.25rem;">
+          No system or custom categories found. Create a custom category to get started.
+        </p>
+        <button class="btn btn-primary" onclick="openAddCategoryModal()">
+          + Add Category
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Categorized Content Container -->
+    <div id="categoriesContent" style="display: none;">
+
+      <!-- SECTION 1: SYSTEM CATEGORIES (Read-Only) -->
+      <section class="category-section">
+        <div class="category-section-header">
+          <h3>
+            <span>🌐 System Categories</span>
+            <span id="systemCountBadge" class="badge badge-system">0</span>
+          </h3>
+          <span class="text-muted" style="font-size: 0.85rem;">Pre-configured & shared across all accounts</span>
+        </div>
+
+        <div id="systemEmptyNotice" class="text-muted" style="display: none; padding: 1rem 0;">
+          No system categories match the selected filter.
+        </div>
+
+        <div id="systemCategoriesGrid" class="accounts-grid">
+          <!-- Populated dynamically by categories.js -->
+        </div>
+      </section>
+
+      <!-- SECTION 2: MY CUSTOM CATEGORIES (User-Owned) -->
+      <section class="category-section">
+        <div class="category-section-header">
+          <h3>
+            <span>✨ My Custom Categories</span>
+            <span id="customCountBadge" class="badge badge-custom">0</span>
+          </h3>
+          <span class="text-muted" style="font-size: 0.85rem;">Personalized categories private to your account</span>
+        </div>
+
+        <!-- Empty Custom Categories State -->
+        <div id="customEmptyState" class="placeholder-box" style="display: none; margin-bottom: 1.5rem;">
+          <div class="placeholder-icon">🏷️</div>
+          <h4>No custom categories yet</h4>
+          <p class="text-secondary" style="margin-bottom: 1.25rem;">
+            Create your own custom categories to organize personal lifestyle, hobby, or project expenses.
+          </p>
+          <button id="emptyAddBtn" class="btn btn-primary">
+            + Add Category
+          </button>
+        </div>
+
+        <div id="customCategoriesGrid" class="accounts-grid">
+          <!-- Populated dynamically by categories.js -->
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Add / Edit Custom Category Modal -->
+  <div id="categoryModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalTitle">Add Custom Category</h3>
+        <button type="button" id="closeCategoryModalBtn" class="modal-close-btn" aria-label="Close modal">&times;</button>
+      </div>
+
+      <form id="categoryForm" novalidate>
+        <div class="modal-body">
+          <!-- Inline Modal Error Alert -->
+          <div id="modalError" class="alert alert-error" style="display: none;" role="alert"></div>
+
+          <div class="form-group">
+            <label for="categoryName">Category Name <span class="text-muted">*</span></label>
+            <input 
+              type="text" 
+              id="categoryName" 
+              class="form-control" 
+              placeholder="e.g. Subscriptions, Freelance, Gym" 
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="categoryType">Category Type <span class="text-muted">*</span></label>
+            <select id="categoryType" class="form-control" required>
+              <option value="Expense" selected>Expense</option>
+              <option value="Income">Income</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="categoryDescription">Description <span class="text-muted">(Optional)</span></label>
+            <textarea 
+              id="categoryDescription" 
+              class="form-control" 
+              rows="3" 
+              placeholder="Brief description of transactions classified under this category"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="cancelCategoryBtn" class="btn btn-secondary">Cancel</button>
+          <button type="submit" id="saveCategoryBtn" class="btn btn-primary">Save Category</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Category Confirmation Modal -->
+  <div id="deleteModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Confirm Category Deletion</h3>
+        <button type="button" id="closeDeleteModalBtn" class="modal-close-btn" aria-label="Close modal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <p id="deleteConfirmMessage" style="margin-bottom: 0.5rem;"></p>
+        <p class="text-muted" style="font-size: 0.85rem;">
+          Warning: If this category is linked to past transactions or budget allocations, deletion will be rejected to protect historical financial integrity.
+        </p>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" id="cancelDeleteBtn" class="btn btn-secondary">Cancel</button>
+        <button type="button" id="confirmDeleteBtn" class="btn btn-danger">Delete Category</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/categories.js"></script>
+</body>
+</html>
