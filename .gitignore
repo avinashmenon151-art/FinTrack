@@ -1,0 +1,56 @@
+# Compiled Java Class Files
+*.class
+
+# Log files
+*.log
+logs/
+
+# Package Files / Archives
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Virtual Machine Crash Logs
+hs_err_pid*
+replay_pid*
+
+# Build and Target Directories
+target/
+bin/
+build/
+out/
+
+# CLI Application Output (keep directory structure)
+cli-app/output/*
+!cli-app/output/.gitkeep
+
+# IDE and Editor Configurations
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+*.sublime-project
+*.sublime-workspace
+
+# Apache Tomcat / Server Specific
+work/
+temp/
+.metadata/
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Environment and Secret Configurations
+.env
+*.local
+*.dump
+*.sql.bak

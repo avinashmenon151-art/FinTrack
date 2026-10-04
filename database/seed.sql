@@ -1,0 +1,2 @@
+-- FinTrack Database Seed Data
+-- Initial reference and test data will be defined in Phase 2.

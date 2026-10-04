@@ -1,0 +1,2 @@
+-- FinTrack Database Schema (PostgreSQL)
+-- Tables and constraints will be defined in Phase 2.
