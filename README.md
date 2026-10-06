@@ -1,6 +1,6 @@
 # FinTrack – Personal Finance Management System
 
-A robust, production-ready, full-stack personal finance management application designed to help users track expenses, manage budgets, monitor income streams, and achieve personal savings goals.
+A full-stack personal finance management application designed to help users track expenses, manage budgets, monitor income, and achieve savings goals.
 
 ---
 
