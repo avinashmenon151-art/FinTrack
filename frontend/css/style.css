@@ -5,30 +5,41 @@
 
 :root {
   /* Color Palette */
-  --bg-primary: #0f172a;       /* Slate 900 */
-  --bg-secondary: #1e293b;     /* Slate 800 */
-  --bg-card: #1e293b;          /* Card Background */
+  --bg-primary: #0f172a;
+  /* Slate 900 */
+  --bg-secondary: #1e293b;
+  /* Slate 800 */
+  --bg-card: #1e293b;
+  /* Card Background */
   --bg-card-hover: #243447;
-  --bg-input: #0f172a;         /* Deep Input Field */
-  
-  --text-primary: #f8fafc;     /* Slate 50 */
-  --text-secondary: #94a3b8;   /* Slate 400 */
-  --text-muted: #64748b;       /* Slate 500 */
-  
-  --accent-green: #10b981;     /* Emerald 500 (Positive financial action) */
+  --bg-input: #0f172a;
+  /* Deep Input Field */
+
+  --text-primary: #f8fafc;
+  /* Slate 50 */
+  --text-secondary: #94a3b8;
+  /* Slate 400 */
+  --text-muted: #64748b;
+  /* Slate 500 */
+
+  --accent-green: #10b981;
+  /* Emerald 500 (Positive financial action) */
   --accent-green-hover: #059669;
   --accent-green-subtle: rgba(16, 185, 129, 0.12);
-  
-  --accent-red: #ef4444;       /* Red 500 (Errors / Danger) */
+
+  --accent-red: #ef4444;
+  /* Red 500 (Errors / Danger) */
   --accent-red-hover: #dc2626;
   --accent-red-subtle: rgba(239, 68, 68, 0.12);
 
-  --accent-blue: #38bdf8;      /* Sky 400 */
+  --accent-blue: #38bdf8;
+  /* Sky 400 */
   --accent-blue-subtle: rgba(56, 189, 248, 0.12);
-  
-  --border-color: #334155;     /* Slate 700 */
+
+  --border-color: #334155;
+  /* Slate 700 */
   --border-focus: #10b981;
-  
+
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 16px;
@@ -47,7 +58,9 @@
    Base & Reset
    ========================================================================== */
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -79,7 +92,10 @@ a:hover {
    Typography & Utilities
    ========================================================================== */
 
-h1, h2, h3, h4 {
+h1,
+h2,
+h3,
+h4 {
   color: var(--text-primary);
   font-weight: 600;
   letter-spacing: -0.02em;
@@ -724,9 +740,20 @@ p {
   border-radius: var(--radius-lg);
   width: 100%;
   max-width: 480px;
+  max-height: 90vh;
   box-shadow: var(--shadow-lg);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
   animation: modalFadeIn 0.15s ease-out;
+}
+
+.modal-card form {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  flex: 1;
 }
 
 @keyframes modalFadeIn {
@@ -734,6 +761,7 @@ p {
     opacity: 0;
     transform: scale(0.96);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -771,6 +799,8 @@ p {
 
 .modal-body {
   padding: 1.5rem;
+  overflow-y: auto;
+  max-height: 65vh;
 }
 
 .modal-footer {
@@ -1081,15 +1111,18 @@ p {
   .filter-grid {
     grid-template-columns: 1fr;
   }
+
   .filter-actions {
     flex-direction: row;
     width: 100%;
     margin-top: 0.5rem;
   }
+
   .filter-actions .btn {
     flex: 1;
     justify-content: center;
   }
+
   .transaction-table th,
   .transaction-table td {
     padding: 0.75rem 0.75rem;
@@ -1326,14 +1359,17 @@ p {
   .budgets-grid {
     grid-template-columns: 1fr;
   }
+
   .budget-metrics-row {
     grid-template-columns: 1fr;
     gap: 0.5rem;
   }
+
   .cat-manager-row {
     flex-direction: column;
     align-items: flex-start;
   }
+
   .cat-manager-row-actions {
     width: 100%;
     justify-content: flex-end;
@@ -1493,13 +1529,9 @@ p {
   .goals-grid {
     grid-template-columns: 1fr;
   }
+
   .goal-amounts-row {
     grid-template-columns: 1fr;
     gap: 0.5rem;
   }
 }
-
-
-
-
-
