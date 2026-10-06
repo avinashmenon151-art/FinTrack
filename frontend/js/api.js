@@ -4,7 +4,7 @@
  * Uses standard fetch with credentials: "include" for session cookie management.
  */
 
-const API_BASE_URL = window.FINTRACK_API_BASE_URL || "http://localhost:8080";
+const API_BASE_URL = window.FINTRACK_API_BASE_URL || "http://localhost:8080/fintrack";
 
 /**
  * Custom error class representing an API error.
