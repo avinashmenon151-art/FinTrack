@@ -238,6 +238,70 @@ p {
   margin-top: 0.25rem;
 }
 
+/* Password visibility toggle input wrapper */
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.password-input-wrapper .form-control {
+  padding-right: 2.75rem;
+}
+
+.password-input-wrapper .form-control::-ms-reveal,
+.password-input-wrapper .form-control::-ms-clear {
+  display: none;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 0.6rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 0.35rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+  line-height: 1;
+}
+
+.password-toggle-btn:hover {
+  color: var(--accent-green);
+  background-color: var(--accent-green-subtle);
+}
+
+.password-toggle-btn:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 1px;
+  color: var(--accent-green);
+}
+
+.password-toggle-btn svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  display: block;
+}
+
+.password-toggle-btn .eye-off-icon {
+  display: none;
+}
+
+.password-toggle-btn.is-visible .eye-icon {
+  display: none;
+}
+
+.password-toggle-btn.is-visible .eye-off-icon {
+  display: block;
+}
+
 /* ==========================================================================
    Buttons
    ========================================================================== */
