@@ -62,7 +62,7 @@ VALUES
     (
         'Avinash Menon',
         'avinash@example.com',
-        '$2a$12$e80yq9j6K8aX9uI0j7q4eOzRzV0J6P4N3m7F8s9d0a1b2c3d4e5f6',
+        '$2a$12$o1O4OQapHgraUWn4ByukvOY7HdaYpkjBZpfhY/bCy7Pa3kRmn4g3C',
         '+91 9876543210',
         NULL,
         '2026-09-01 09:00:00+05:30'
@@ -70,7 +70,7 @@ VALUES
     (
         'Rahul Sharma',
         'rahul@example.com',
-        '$2a$12$f91zr0k7L9bY0vJ1k8r5fP0SaW1K7Q5O4n8G9t0e1b2c3d4e5f6g7',
+        '$2a$12$T.bCrsfanYj9DoTfTVn67.5okMMuQIrQBG6CwQvYIjPj9FsGSncgq',
         '+91 9812345678',
         NULL,
         '2026-09-01 10:15:00+05:30'
@@ -78,7 +78,7 @@ VALUES
     (
         'Ananya Nair',
         'ananya@example.com',
-        '$2a$12$g02as1l8M0cZ1wK2l9s6gQ1TbX2L8R6P5o9H0u1f2c3d4e5f6g7h8',
+        '$2a$12$Va5S9y14PW.SiWt4CQGTIuLWXFV/IyDTOjc9QOgqkhQPWjuTb3nLm',
         '+91 9845012345',
         NULL,
         '2026-09-02 11:30:00+05:30'
