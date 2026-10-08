@@ -206,4 +206,4 @@ For demonstration, development, and evaluation purposes, the following sample pr
 
 ## 10. CLI Module Status
 
-The `cli-app/` directory contains an architectural scaffold intended for future standalone console utilities. The core application logic, security, and financial operations are fully realized and accessible via the Java Servlet backend and Web frontend.
+The `cli-app/` directory houses the **FinTrack Command-Line Interface (CLI)**, a functional secondary interface sharing the same PostgreSQL database, backend DAOs, and BCrypt security layer. See [cli-app/README.md](cli-app/README.md) for full compilation, configuration, and terminal execution instructions.

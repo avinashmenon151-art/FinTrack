@@ -241,13 +241,14 @@ p {
 /* Password visibility toggle input wrapper */
 .password-input-wrapper {
   position: relative;
-  display: flex;
-  align-items: center;
+  display: block;
   width: 100%;
 }
 
 .password-input-wrapper .form-control {
-  padding-right: 2.75rem;
+  width: 100%;
+  padding-right: 45px;
+  box-sizing: border-box;
 }
 
 .password-input-wrapper .form-control::-ms-reveal,
@@ -257,37 +258,51 @@ p {
 
 .password-toggle-btn {
   position: absolute;
-  right: 0.6rem;
+  right: 12px;
   top: 50%;
   transform: translateY(-50%);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
-  border: none;
-  padding: 0.35rem;
-  color: var(--text-secondary);
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  outline: none;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  color: var(--text-muted, #94a3b8);
   cursor: pointer;
-  border-radius: var(--radius-sm);
-  transition: color var(--transition-fast), background-color var(--transition-fast);
   line-height: 1;
+  z-index: 2;
+  transition: color var(--transition-fast);
 }
 
 .password-toggle-btn:hover {
-  color: var(--accent-green);
-  background-color: var(--accent-green-subtle);
+  color: var(--accent-green, #10b981);
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+.password-toggle-btn:focus {
+  outline: none;
 }
 
 .password-toggle-btn:focus-visible {
-  outline: 2px solid var(--border-focus);
-  outline-offset: 1px;
-  color: var(--accent-green);
+  outline: 2px solid var(--border-focus, #10b981);
+  outline-offset: 2px;
+  border-radius: 4px;
+  color: var(--accent-green, #10b981);
 }
 
 .password-toggle-btn svg {
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 20px;
+  height: 20px;
   display: block;
+  stroke: currentColor;
 }
 
 .password-toggle-btn .eye-off-icon {
